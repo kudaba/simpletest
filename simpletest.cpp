@@ -65,13 +65,12 @@ bool TestFixture::ExecuteTest()
 	myNumTestsChecked = myNumErrors = 0;
 	myNextError = (TestError*)myMessageSpace;
 
-	Setup();
-
+	TestFixture const* lastCurrent = ourCurrentTest;
 	ourCurrentTest = this;
+	Setup();
 	RunTest();
-	ourCurrentTest = nullptr;
-
 	TearDown();
+	ourCurrentTest = lastCurrent;
 
 	return myNumErrors == 0;
 }
@@ -123,54 +122,64 @@ TestFixture const* TestFixture::LinkTest(TestFixture* test)
 //---------------------------------------------------------------------------------
 // Standard / Example runners
 //---------------------------------------------------------------------------------
-static bool locExecuteTest(TestFixture* test)
+static bool locExecuteTest(TestFixture* test, TestFixture::OutputMode output)
 {
-	printf("[%s]", test->TestName());
+	if (output == TestFixture::Verbose)
+		printf("Running [%s/%s]", test->TestGroup(), test->TestName());
+
 	if (test->ExecuteTest())
 	{
-		printf(": Passed %d out of %d tests\n", test->NumTests(), test->NumTests());
+		if (output == TestFixture::Verbose)
+			printf(": Passed %d out of %d tests\n", test->NumTests(), test->NumTests());
 		return true;
 	}
 
-	printf(": Failed %d out of %d tests\n", test->NumErrors(), test->NumTests());
-	for (TestError const* err = test->GetFirstError(), *e = test->GetLastError(); err != e; err = err->next)
+	if (output != TestFixture::Silent)
 	{
-		printf("%s\n", err->message);
+		if (output != TestFixture::Verbose)
+			printf("[%s/%s]", test->TestGroup(), test->TestName());
+
+		printf(": Failed %d out of %d tests\n", test->NumErrors(), test->NumTests());
+
+		for (TestError const* err = test->GetFirstError(), *e = test->GetLastError(); err != e; err = err->next)
+		{
+			printf("%s\n", err->message);
+		}
 	}
 
 	return false;
 }
-bool TestFixture::ExecuteAllTests()
+bool TestFixture::ExecuteAllTests(OutputMode output)
 {
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
-		if (!locExecuteTest(i))
+		if (!locExecuteTest(i, output))
 			passed = false;
 	}
 	return passed;
 }
-bool TestFixture::ExecuteTestGroup(const char* group)
+bool TestFixture::ExecuteTestGroup(const char* group, OutputMode output)
 {
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
 		if (_stricmp(group, i->TestGroup()) == 0)
 		{
-			if (!locExecuteTest(i))
+			if (!locExecuteTest(i, output))
 				passed = false;
 		}
 	}
 	return passed;
 }
-bool TestFixture::ExecuteSingleTest(const char* group, const char* test)
+bool TestFixture::ExecuteSingleTest(const char* group, const char* test, OutputMode output)
 {
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
 		if (_stricmp(group, i->TestGroup()) == 0 && _stricmp(test, i->TestName()) == 0)
 		{
-			if (!locExecuteTest(i))
+			if (!locExecuteTest(i, output))
 				passed = false;
 		}
 	}

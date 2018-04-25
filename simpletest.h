@@ -73,10 +73,17 @@ public:
 	static TestFixture const* GetCurrentTest() { return ourCurrentTest; }
 	TestFixture* GetNextTest() const { return myNextTest; }
 
+	enum OutputMode
+	{
+		Silent,
+		Normal,
+		Verbose
+	};
+
 	// Default execution implementation
-	static bool ExecuteAllTests();
-	static bool ExecuteTestGroup(const char* group);
-	static bool ExecuteSingleTest(const char* group, const char* test);
+	static bool ExecuteAllTests(OutputMode output = Normal);
+	static bool ExecuteTestGroup(const char* group, OutputMode output = Normal);
+	static bool ExecuteSingleTest(const char* group, const char* test, OutputMode output = Normal);
 
 protected:
 	virtual void RunTest() const = 0;
@@ -103,12 +110,12 @@ protected:
 // Test definition macros
 //---------------------------------------------------------------------------------
 #define DEFINE_TEST_FULL(name, group, fixture) \
-struct name final : public fixture { \
+struct TOK(group, name) final : public fixture { \
 	char const* TestName() const override { return #name; } \
 	char const* TestGroup() const override { return #group; } \
 	void RunTest() const override; \
-} name ## Instance; \
-void name::RunTest() const
+} TOK(name, Instance); \
+void TOK(group, name)::RunTest() const
 
 #define DEFINE_TEST(name) DEFINE_TEST_FULL(name, Global, BASE_FIXTURE)
 #define DEFINE_TEST_G(name, group) DEFINE_TEST_FULL(name, group, BASE_FIXTURE)

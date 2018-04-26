@@ -71,6 +71,7 @@ In addition the the 4 variants of test declarations and fixtures, there's a smal
 * TEST_<operator>(a, b) - Operator comparison from a to b
   * Variants include _EQ, _NEQ, _GREATER, _LESS, _GREATER_EQ, _LESS_EQ
 * TEST_CLOSE(a, b, eps) - Test that two values are within eps(ilon) of each other
+* TEST_MESSAGE(condition, message, ...) - On failure print a custom message.
 
 ## Custom type printers
 **TODO** Actually implement this feature. Until then the operator macros will only work on basic integer, float, const char* and void* types.
@@ -92,4 +93,4 @@ Global configuration is generally done by defininy macros before including simpl
 If you want all tests to use the same fixture, for default memory checking or exception catching, then simply define the macro BASE_FIXTURE.
 
 ## Static memory usage
-To achieve allocation free tests I needed to give each test a memory area to write their error messages. The default is (probably out of date) 100k. You can override this by defining the MESSAGE_SPACE macro.
+To achieve allocation free tests I needed to give each test a memory area to write their error messages. The default is (probably out of date) 10k per test. You can override this by defining the MESSAGE_SPACE macro.

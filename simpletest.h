@@ -4,7 +4,7 @@
 // Config
 //---------------------------------------------------------------------------------
 #if !defined(MESSAGE_SPACE)
-#define MESSAGE_SPACE 100 * 1024 // default 100k of message space is reserved per test
+#define MESSAGE_SPACE 10 * 1024 // default 10k of message space is reserved per test
 #endif
 #if !defined(BASE_FIXTURE)
 #define BASE_FIXTURE TestFixture // use TestFixture as the test base class by default
@@ -140,11 +140,12 @@ T abs(T t) { return t < 0 ? -t : t; }
 //---------------------------------------------------------------------------------
 #define TEST_ERROR_STRING_(cond, text) __FILE__ "(" STR(__LINE__) "): Condition [" cond "] Failed. " text
 #define TEST_ERROR_(cond, text, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_STRING_(cond, text), __VA_ARGS__); } while(0)
+#define TEST_CHECK_(cond, condtext, text, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(condtext, text, __VA_ARGS__)
 
 //---------------------------------------------------------------------------------
 // Tests
 //---------------------------------------------------------------------------------
-#define TEST_OPERATOR(a, b, op1, op2) TestFixture::GetCurrentTest()->AddTest(); if (!(a op1 b)) TEST_ERROR_(STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", *TypeToString(a), *TypeToString(b))
+#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_(a op1 b, STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", *TypeToString(a), *TypeToString(b))
 
 #define TEST(cond) TEST_EQ(cond, true)
 
@@ -155,4 +156,5 @@ T abs(T t) { return t < 0 ? -t : t; }
 #define TEST_LESS(a, b) TEST_OPERATOR(a, b, <, >=)
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
-#define TEST_CLOSE(a, b, eps) TestFixture::GetCurrentTest()->AddTest(); if (abs(a-b) > eps) TEST_ERROR_(STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(abs(a-b)))
+#define TEST_CLOSE(a, b, eps) TEST_CHECK_(abs(a-b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(abs(a-b)))
+#define TEST_MESSAGE(cond, ...) TEST_CHECK_(cond, #cond, __VA_ARGS__)

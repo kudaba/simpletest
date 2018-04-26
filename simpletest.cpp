@@ -38,7 +38,7 @@ TypeToString::TypeToString(double floatingPoint)
 }
 TypeToString::TypeToString(bool boolean)
 {
-	myTextPointer = boolean ? "TRUE" : "FALSE";
+	myTextPointer = boolean ? "true" : "false";
 }
 TypeToString::TypeToString(char const* string)
 {
@@ -93,7 +93,7 @@ void TestFixture::LogError(char const* string, ...) const
 	va_list args;
 	__crt_va_start_a(args, string);
 
-	int printedChars = vsprintf_s(myNextError->message, spaceLeft, string, args);
+	int printedChars = vsnprintf_s(myNextError->message, spaceLeft, spaceLeft-1, string, args);
 
 	__crt_va_end(args);
 

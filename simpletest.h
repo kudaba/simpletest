@@ -23,22 +23,24 @@ struct TestError
 // simple converter of basic types to text
 // TODO: Use a global template function for conversion so users can override this
 //---------------------------------------------------------------------------------
-struct TypeToString
+struct TempString
 {
-	TypeToString(int integer);
-	TypeToString(__int64 integer);
-	TypeToString(unsigned int integer);
-	TypeToString(unsigned __int64 integer);
-	TypeToString(double floatingPoint);
-	TypeToString(bool boolean);
-	TypeToString(char const* string);
-	TypeToString(void const* pointer);
+	TempString() : myTextPointer(myTextBuffer) {}
+	TempString(char const* string) : myTextPointer(string) {}
 
 	char const* operator*() const { return myTextPointer; }
-private:
+
 	char myTextBuffer[64];
 	char const* myTextPointer;
 };
+
+TempString TypeToString(int value);
+TempString TypeToString(__int64 value);
+TempString TypeToString(unsigned int value);
+TempString TypeToString(unsigned __int64 value);
+TempString TypeToString(double value);
+TempString TypeToString(bool value);
+TempString TypeToString(char const* value);
 
 //---------------------------------------------------------------------------------
 // Test fixture is the core of SimpleTest. It provides fixture behavior, access
@@ -57,8 +59,8 @@ public:
 	virtual char const* TestGroup() const = 0;
 
 	// Reporting used during testing process
-	void AddTest() const { ++myNumTestsChecked; }
-	void LogError(char const* string, ...) const;
+	void AddTest() { ++myNumTestsChecked; }
+	void LogError(char const* string, ...);
 
 	// Stats from execution
 	int NumTests() const { return myNumTestsChecked; }
@@ -70,7 +72,7 @@ public:
 
 	// Access to registered tests
 	static TestFixture* GetFirstTest() { return ourFirstTest; }
-	static TestFixture const* GetCurrentTest() { return ourCurrentTest; }
+	static TestFixture* GetCurrentTest() { return ourCurrentTest; }
 	TestFixture* GetNextTest() const { return myNextTest; }
 
 	enum OutputMode
@@ -86,7 +88,7 @@ public:
 	static bool ExecuteSingleTest(const char* group, const char* test, OutputMode output = Normal);
 
 protected:
-	virtual void RunTest() const = 0;
+	virtual void RunTest() = 0;
 	virtual void Setup() {}
 	virtual void TearDown() {}
 	
@@ -96,14 +98,14 @@ protected:
 
 	TestFixture* myNextTest;
 
-	mutable int myNumTestsChecked;
-	mutable int myNumErrors;
+	int myNumTestsChecked;
+	int myNumErrors;
 
-	mutable TestError* myNextError;
-	mutable char myMessageSpace[MESSAGE_SPACE];
+	TestError* myNextError;
+	char myMessageSpace[MESSAGE_SPACE];
 
 	// allow access to current test outside of main code block
-	static thread_local TestFixture const* ourCurrentTest;
+	static thread_local TestFixture* ourCurrentTest;
 };
 
 //---------------------------------------------------------------------------------
@@ -113,9 +115,9 @@ protected:
 struct TOK(group, name) final : public fixture { \
 	char const* TestName() const override { return #name; } \
 	char const* TestGroup() const override { return #group; } \
-	void RunTest() const override; \
+	void RunTest() override; \
 } TOK(name, Instance); \
-void TOK(group, name)::RunTest() const
+void TOK(group, name)::RunTest()
 
 #define DEFINE_TEST(name) DEFINE_TEST_FULL(name, Global, BASE_FIXTURE)
 #define DEFINE_TEST_G(name, group) DEFINE_TEST_FULL(name, group, BASE_FIXTURE)

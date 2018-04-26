@@ -6,48 +6,54 @@
 // statics
 //---------------------------------------------------------------------------------
 TestFixture* TestFixture::ourFirstTest;
-thread_local TestFixture const* TestFixture::ourCurrentTest;
+thread_local TestFixture* TestFixture::ourCurrentTest;
 
 //---------------------------------------------------------------------------------
 // Standard type printers
 //---------------------------------------------------------------------------------
-TypeToString::TypeToString(int integer)
+TempString TypeToString(int value)
 {
-	sprintf_s(myTextBuffer, "%d", integer);
-	myTextPointer = myTextBuffer;
+	TempString tempString;
+	sprintf_s(tempString.myTextBuffer, "%d", value);
+	return tempString;
 }
-TypeToString::TypeToString(__int64 integer)
+TempString TypeToString(__int64 value)
 {
-	sprintf_s(myTextBuffer, "%lld", integer);
-	myTextPointer = myTextBuffer;
+	TempString tempString;
+	sprintf_s(tempString.myTextBuffer, "%lld", value);
+	return tempString;
 }
-TypeToString::TypeToString(unsigned int integer)
+TempString TypeToString(unsigned int value)
 {
-	sprintf_s(myTextBuffer, "%u", integer);
-	myTextPointer = myTextBuffer;
+	TempString tempString;
+	sprintf_s(tempString.myTextBuffer, "%u", value);
+	return tempString;
 }
-TypeToString::TypeToString(unsigned __int64 integer)
+TempString TypeToString(unsigned __int64 value)
 {
-	sprintf_s(myTextBuffer, "%llu", integer);
-	myTextPointer = myTextBuffer;
+	TempString tempString;
+	sprintf_s(tempString.myTextBuffer, "%llu", value);
+	return tempString;
 }
-TypeToString::TypeToString(double floatingPoint)
+TempString TypeToString(double value)
 {
-	sprintf_s(myTextBuffer, "%f", floatingPoint);
-	myTextPointer = myTextBuffer;
+	TempString tempString;
+	sprintf_s(tempString.myTextBuffer, "%f", value);
+	return tempString;
 }
-TypeToString::TypeToString(bool boolean)
+TempString TypeToString(bool value)
 {
-	myTextPointer = boolean ? "true" : "false";
+	return TempString(value ? "true" : "false");
 }
-TypeToString::TypeToString(char const* string)
+TempString TypeToString(char const* value)
 {
-	myTextPointer = string;
+	return TempString(value);
 }
-TypeToString::TypeToString(void const* pointer)
+TempString TypeToString(void const* value)
 {
-	sprintf_s(myTextBuffer, "0x%p", pointer);
-	myTextPointer = myTextBuffer;
+	TempString tempString;
+	sprintf_s(tempString.myTextBuffer, "0x%p", value);
+	return tempString;
 }
 
 //---------------------------------------------------------------------------------
@@ -65,7 +71,7 @@ bool TestFixture::ExecuteTest()
 	myNumTestsChecked = myNumErrors = 0;
 	myNextError = (TestError*)myMessageSpace;
 
-	TestFixture const* lastCurrent = ourCurrentTest;
+	TestFixture* lastCurrent = ourCurrentTest;
 	ourCurrentTest = this;
 	Setup();
 	RunTest();
@@ -77,7 +83,7 @@ bool TestFixture::ExecuteTest()
 //---------------------------------------------------------------------------------
 // Write error into current error object and advance pointer if there's still enough space
 //---------------------------------------------------------------------------------
-void TestFixture::LogError(char const* string, ...) const
+void TestFixture::LogError(char const* string, ...)
 {
 	++myNumErrors;
 

@@ -6,6 +6,9 @@
 #if !defined(MESSAGE_SPACE)
 #define MESSAGE_SPACE 10 * 1024 // default 10k of message space is reserved per test
 #endif
+#if !defined(STRING_LENGTH)
+#define STRING_LENGTH 64 // size of temp strings for converting types
+#endif
 #if !defined(BASE_FIXTURE)
 #define BASE_FIXTURE TestFixture // use TestFixture as the test base class by default
 #endif
@@ -26,11 +29,12 @@ struct TestError
 struct TempString
 {
 	TempString() : myTextPointer(myTextBuffer) {}
+	TempString(const TempString& other);
 	TempString(char const* string) : myTextPointer(string) {}
 
 	char const* operator*() const { return myTextPointer; }
 
-	char myTextBuffer[64];
+	char myTextBuffer[STRING_LENGTH];
 	char const* myTextPointer;
 };
 
@@ -159,4 +163,4 @@ T abs(T t) { return t < 0 ? -t : t; }
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
 #define TEST_CLOSE(a, b, eps) TEST_CHECK_(abs(a-b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(abs(a-b)))
-#define TEST_MESSAGE(cond, ...) TEST_CHECK_(cond, #cond, __VA_ARGS__)
+#define TEST_MESSAGE(cond, ...) TEST_CHECK_(cond, STR(cond), __VA_ARGS__)

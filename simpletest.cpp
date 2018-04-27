@@ -11,6 +11,18 @@ thread_local TestFixture* TestFixture::ourCurrentTest;
 //---------------------------------------------------------------------------------
 // Standard type printers
 //---------------------------------------------------------------------------------
+TempString::TempString(const TempString& other)
+{
+	if (other.myTextPointer == other.myTextBuffer)
+	{
+		strcpy_s(myTextBuffer, other.myTextBuffer);
+		myTextPointer = myTextBuffer;
+	}
+	else
+	{
+		myTextPointer = other.myTextPointer;
+	}
+}
 TempString TypeToString(int value)
 {
 	TempString tempString;
@@ -47,7 +59,7 @@ TempString TypeToString(bool value)
 }
 TempString TypeToString(char const* value)
 {
-	return TempString(value);
+	return TempString(value ? value : "(nullptr)");
 }
 TempString TypeToString(void const* value)
 {

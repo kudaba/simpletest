@@ -1,11 +1,15 @@
 # simpletest
 
+_**A super simple framwork for implementing Unit Tests**_
+
 A lot of c++ unit tests claim to be simple, but when I went searching for the perfect one there was always something that prevented me from using it. They were either overly complicated or had some critical flaw like excess memory allocations or dependencies on external programs. So here is the simplest form of unit test I could come up with to cover basic development. My rules for simple were the following:
 * Basic test features only: fixtures and test
 * Simple, isolated test declaration
 * No memory allocations, at all
 * Very few, if any dependencies
 * Bonus: Threadable
+
+Head over to [simpletest_test](https://github.com/kudaba/simpletest_test) for more complete usage examples.
 
 # Basic test features
 Every test code seems to use slight variants of terminology so heres mine.
@@ -85,6 +89,14 @@ After seeing unit tests that need perl or python to generate test harnesses, or 
 # Threadable
 By keeping the fixture, test and results in a single object it means that the execution of a single test is threadable as long that the test code itself is contained and threadable. There is no default threaded implementation of test execution, but you can see the simpletest_test project for more advanced examples.
 
+# Notable Differences
+
+My primary focus of this framework was to simplify the delcaration of test, NOT to automatically run, report, mock or do any other fancy features. In my experience the execution of the tests depends entirely on the architecture of the code in which its embedded. Reporting might go through a console, a visual app, or even reported to servers so I make no assumptions about how you might want to use it.
+
+Mocking is another feature that I feel is highly dependent on the context of the code being tested and should be left up to the user on how to implement.
+
+Memory sub systems are yet another area that users prefer to have complete control over. There are some examples of how you can easily setup a fixture to do this and simpletest has its own unit test to ensure that no memory allocations occur.
+
 # Extra configuration
 
 Global configuration is generally done by defininy macros before including simpletest.h
@@ -94,3 +106,6 @@ If you want all tests to use the same fixture, for default memory checking or ex
 
 ## Static memory usage
 To achieve allocation free tests I needed to give each test a memory area to write their error messages. The default is (probably out of date) 10k per test. You can override this by defining the MESSAGE_SPACE macro.
+
+## Temporary string length
+The buffer size of the temporary string object can be set by defining STRING_LENGTH. I figured 64 bytes is a decent size for anything that isn't already a string.

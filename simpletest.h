@@ -13,6 +13,10 @@
 #define BASE_FIXTURE TestFixture // use TestFixture as the test base class by default
 #endif
 
+typedef long long int64;
+typedef unsigned int uint;
+typedef unsigned long long uint64;
+
 //---------------------------------------------------------------------------------
 // Link list of errors build into MESSAGE_SPACE
 //---------------------------------------------------------------------------------
@@ -39,9 +43,9 @@ struct TempString
 };
 
 TempString TypeToString(int value);
-TempString TypeToString(__int64 value);
-TempString TypeToString(unsigned int value);
-TempString TypeToString(unsigned __int64 value);
+TempString TypeToString(int64 value);
+TempString TypeToString(uint value);
+TempString TypeToString(uint64 value);
 TempString TypeToString(double value);
 TempString TypeToString(bool value);
 TempString TypeToString(char const* value);
@@ -120,7 +124,7 @@ struct TOK(group, name) final : public fixture { \
 	char const* TestName() const override { return #name; } \
 	char const* TestGroup() const override { return #group; } \
 	void RunTest() override; \
-} TOK(name, Instance); \
+} TOK(TOK(group, name), Instance); \
 void TOK(group, name)::RunTest()
 
 #define DEFINE_TEST(name) DEFINE_TEST_FULL(name, Global, BASE_FIXTURE)
@@ -144,9 +148,9 @@ T abs(T t) { return t < 0 ? -t : t; }
 //---------------------------------------------------------------------------------
 // Error reporting
 //---------------------------------------------------------------------------------
-#define TEST_ERROR_STRING_(cond, text) __FILE__ "(" STR(__LINE__) "): Condition [" cond "] Failed. " text
-#define TEST_ERROR_(cond, text, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_STRING_(cond, text), __VA_ARGS__); } while(0)
-#define TEST_CHECK_(cond, condtext, text, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(condtext, text, __VA_ARGS__)
+#define TEST_ERROR_STRING_(cond) __FILE__ "(" STR(__LINE__) "): Condition [" cond "] Failed. "
+#define TEST_ERROR_(cond, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_STRING_(cond) __VA_ARGS__); } while(0)
+#define TEST_CHECK_(cond, condtext, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(condtext, __VA_ARGS__)
 
 //---------------------------------------------------------------------------------
 // Tests

@@ -1,6 +1,7 @@
 #include "simpletest.h"
 #include <stdio.h>
 #include <string.h>
+#include <cstdint>
 
 //---------------------------------------------------------------------------------
 // statics
@@ -15,7 +16,7 @@ TempString::TempString(const TempString& other)
 {
 	if (other.myTextPointer == other.myTextBuffer)
 	{
-		strcpy_s(myTextBuffer, other.myTextBuffer);
+		strcpy(myTextBuffer, other.myTextBuffer);
 		myTextPointer = myTextBuffer;
 	}
 	else
@@ -26,31 +27,31 @@ TempString::TempString(const TempString& other)
 TempString TypeToString(int value)
 {
 	TempString tempString;
-	sprintf_s(tempString.myTextBuffer, "%d", value);
+	sprintf(tempString.myTextBuffer, "%d", value);
 	return tempString;
 }
-TempString TypeToString(__int64 value)
+TempString TypeToString(int64 value)
 {
 	TempString tempString;
-	sprintf_s(tempString.myTextBuffer, "%lld", value);
+	sprintf(tempString.myTextBuffer, "%lld", value);
 	return tempString;
 }
-TempString TypeToString(unsigned int value)
+TempString TypeToString(uint value)
 {
 	TempString tempString;
-	sprintf_s(tempString.myTextBuffer, "%u", value);
+	sprintf(tempString.myTextBuffer, "%u", value);
 	return tempString;
 }
-TempString TypeToString(unsigned __int64 value)
+TempString TypeToString(uint64 value)
 {
 	TempString tempString;
-	sprintf_s(tempString.myTextBuffer, "%llu", value);
+	sprintf(tempString.myTextBuffer, "%llu", value);
 	return tempString;
 }
 TempString TypeToString(double value)
 {
 	TempString tempString;
-	sprintf_s(tempString.myTextBuffer, "%f", value);
+	sprintf(tempString.myTextBuffer, "%f", value);
 	return tempString;
 }
 TempString TypeToString(bool value)
@@ -64,7 +65,7 @@ TempString TypeToString(char const* value)
 TempString TypeToString(void const* value)
 {
 	TempString tempString;
-	sprintf_s(tempString.myTextBuffer, "0x%p", value);
+	sprintf(tempString.myTextBuffer, "0x%p", value);
 	return tempString;
 }
 
@@ -109,11 +110,20 @@ void TestFixture::LogError(char const* string, ...)
 	spaceLeft -= sizeof(TestError);
 
 	va_list args;
+
+#if defined(_MSC_VER)
 	__crt_va_start_a(args, string);
 
 	int printedChars = vsnprintf_s(myNextError->message, spaceLeft, spaceLeft-1, string, args);
 
 	__crt_va_end(args);
+#else
+	va_start(args, string);
+
+	int printedChars = vsnprintf(myNextError->message, spaceLeft, string, args);
+
+	va_end(args);
+#endif
 
 	// if there isn't a reasonable amount of space left then just advance to end and stop printing errors
 	if (printedChars < (int)(spaceLeft - sizeof(TestError) - 64))
@@ -182,7 +192,7 @@ bool TestFixture::ExecuteTestGroup(const char* group, OutputMode output)
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
-		if (_stricmp(group, i->TestGroup()) == 0)
+		if (strcmp(group, i->TestGroup()) == 0)
 		{
 			if (!locExecuteTest(i, output))
 				passed = false;
@@ -195,7 +205,7 @@ bool TestFixture::ExecuteSingleTest(const char* group, const char* test, OutputM
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
-		if (_stricmp(group, i->TestGroup()) == 0 && _stricmp(test, i->TestName()) == 0)
+		if (strcmp(group, i->TestGroup()) == 0 && strcmp(test, i->TestName()) == 0)
 		{
 			if (!locExecuteTest(i, output))
 				passed = false;

@@ -10,6 +10,33 @@ TestFixture* TestFixture::ourFirstTest;
 thread_local TestFixture* TestFixture::ourCurrentTest;
 
 //---------------------------------------------------------------------------------
+// helper to get the number of decimal places to print for floats and doubles
+//---------------------------------------------------------------------------------
+template <typename T>
+static int locDecimals(T value)
+{
+	const T eps = 0.00001f;
+	T remainder = value - (int)value;
+	if (remainder == 0)
+		return 0;
+
+	int decimals = 0;
+
+	// add decimals until hitting the first non-zero number that shouldn't be rounded (close to 0 or 1)
+	bool hitsomething = int(remainder * 10) != 0;
+	while (!hitsomething ||
+		((remainder > eps && remainder < (1 - eps)) ||
+		(remainder < -eps && remainder >(-1 + eps))))
+	{
+		remainder = remainder * 10;
+		remainder = remainder - (int)remainder;
+		hitsomething |= int(remainder * 10) != 0;
+		++decimals;
+	}
+	return decimals;
+}
+
+//---------------------------------------------------------------------------------
 // Standard type printers
 //---------------------------------------------------------------------------------
 TempString::TempString(const TempString& other)
@@ -48,10 +75,16 @@ TempString TypeToString(uint64 value)
 	sprintf(tempString.myTextBuffer, "%llu", value);
 	return tempString;
 }
+TempString TypeToString(float value)
+{
+	TempString tempString;
+	sprintf(tempString.myTextBuffer, "%0.*f", locDecimals(value), value);
+	return tempString;
+}
 TempString TypeToString(double value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%f", value);
+	sprintf(tempString.myTextBuffer, "%0.*f", locDecimals(value), value);
 	return tempString;
 }
 TempString TypeToString(bool value)

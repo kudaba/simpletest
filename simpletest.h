@@ -46,6 +46,7 @@ TempString TypeToString(int value);
 TempString TypeToString(int64 value);
 TempString TypeToString(uint value);
 TempString TypeToString(uint64 value);
+TempString TypeToString(float value);
 TempString TypeToString(double value);
 TempString TypeToString(bool value);
 TempString TypeToString(char const* value);

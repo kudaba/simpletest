@@ -2,6 +2,9 @@
 
 _**A super simple framwork for implementing Unit Tests**_
 
+[![Build Status](https://travis-ci.org/kudaba/simpletest_test.svg?branch=master)](https://travis-ci.org/kudaba/simpletest_test)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/kudaba/simpletest_test?branch=master&svg=true)](https://ci.appveyor.com/project/kudaba/simpletest-test)
+
 A lot of c++ unit tests claim to be simple, but when I went searching for the perfect one there was always something that prevented me from using it. They were either overly complicated or had some critical flaw like excess memory allocations or dependencies on external programs. So here is the simplest form of unit test I could come up with to cover basic development. My rules for simple were the following:
 * Basic test features only: fixtures and test
 * Simple, isolated test declaration

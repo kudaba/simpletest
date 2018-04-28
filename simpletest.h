@@ -156,7 +156,7 @@ T abs(T t) { return t < 0 ? -t : t; }
 //---------------------------------------------------------------------------------
 // Tests
 //---------------------------------------------------------------------------------
-#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_(a op1 b, STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", *TypeToString(a), *TypeToString(b))
+#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_((a) op1 (b), STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", *TypeToString(a), *TypeToString(b))
 
 #define TEST(cond) TEST_EQ(cond, true)
 

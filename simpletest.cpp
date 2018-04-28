@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstdint>
+#include <stdarg.h>
 
 //---------------------------------------------------------------------------------
 // statics
@@ -144,19 +145,11 @@ void TestFixture::LogError(char const* string, ...)
 
 	va_list args;
 
-#if defined(_MSC_VER)
-	__crt_va_start_a(args, string);
-
-	int printedChars = vsnprintf_s(myNextError->message, spaceLeft, spaceLeft-1, string, args);
-
-	__crt_va_end(args);
-#else
 	va_start(args, string);
 
 	int printedChars = vsnprintf(myNextError->message, spaceLeft, string, args);
 
 	va_end(args);
-#endif
 
 	// if there isn't a reasonable amount of space left then just advance to end and stop printing errors
 	if (printedChars < (int)(spaceLeft - sizeof(TestError) - 64))

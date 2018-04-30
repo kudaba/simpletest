@@ -38,8 +38,8 @@ struct TempString
 
 	char const* operator*() const { return myTextPointer; }
 
-	char myTextBuffer[STRING_LENGTH];
 	char const* myTextPointer;
+	char myTextBuffer[STRING_LENGTH];
 };
 
 TempString TypeToString(int value);
@@ -50,6 +50,10 @@ TempString TypeToString(float value);
 TempString TypeToString(double value);
 TempString TypeToString(bool value);
 TempString TypeToString(char const* value);
+
+// if nothing specified then print some memory
+template<typename T>
+TempString TypeToString(T const&) { return TempString("(unknown type)"); }
 
 //---------------------------------------------------------------------------------
 // Test fixture is the core of SimpleTest. It provides fixture behavior, access
@@ -92,6 +96,8 @@ public:
 	};
 
 	// Default execution implementation
+	static void (*Print)(char const* string);
+	static void Printf(char const* string, ...);
 	static bool ExecuteAllTests(OutputMode output = Normal);
 	static bool ExecuteTestGroup(const char* group, OutputMode output = Normal);
 	static bool ExecuteSingleTest(const char* group, const char* test, OutputMode output = Normal);
@@ -137,7 +143,7 @@ void TOK(group, name)::RunTest()
 // Utils
 //---------------------------------------------------------------------------------
 template <typename T>
-T abs(T t) { return t < 0 ? -t : t; }
+T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp : tmp; }
 
 // why are these still needed?
 #define STR2(x) #x
@@ -147,11 +153,11 @@ T abs(T t) { return t < 0 ? -t : t; }
 #define TOK(a, b) TOK2(a, b)
 
 //---------------------------------------------------------------------------------
-// Error reporting
+// Error reporting don't call directly
 //---------------------------------------------------------------------------------
-#define TEST_ERROR_STRING_(cond) __FILE__ "(" STR(__LINE__) "): Condition [" cond "] Failed. "
-#define TEST_ERROR_(cond, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_STRING_(cond) __VA_ARGS__); } while(0)
-#define TEST_CHECK_(cond, condtext, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(condtext, __VA_ARGS__)
+#define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
+#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, __VA_ARGS__); } while(0)
+#define TEST_CHECK_(cond, condtext, message, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, __VA_ARGS__)
 
 //---------------------------------------------------------------------------------
 // Tests
@@ -167,5 +173,5 @@ T abs(T t) { return t < 0 ? -t : t; }
 #define TEST_LESS(a, b) TEST_OPERATOR(a, b, <, >=)
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
-#define TEST_CLOSE(a, b, eps) TEST_CHECK_(abs(a-b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(abs(a-b)))
-#define TEST_MESSAGE(cond, ...) TEST_CHECK_(cond, STR(cond), __VA_ARGS__)
+#define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(TestDifference(a,b)))
+#define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, __VA_ARGS__)

@@ -7,8 +7,11 @@
 //---------------------------------------------------------------------------------
 // statics
 //---------------------------------------------------------------------------------
+void DefaultPrint(char const* string) { printf(string); }
+
 TestFixture* TestFixture::ourFirstTest;
 thread_local TestFixture* TestFixture::ourCurrentTest;
+void (*TestFixture::Print)(char const* string) = DefaultPrint;
 
 //---------------------------------------------------------------------------------
 // helper to get the number of decimal places to print for floats and doubles
@@ -179,63 +182,104 @@ TestFixture const* TestFixture::LinkTest(TestFixture* test)
 static bool locExecuteTest(TestFixture* test, TestFixture::OutputMode output)
 {
 	if (output == TestFixture::Verbose)
-		printf("Running [%s/%s]", test->TestGroup(), test->TestName());
+		TestFixture::Printf("Running [%s/%s]", test->TestGroup(), test->TestName());
 
 	if (test->ExecuteTest())
 	{
 		if (output == TestFixture::Verbose)
-			printf(": Passed %d out of %d tests\n", test->NumTests(), test->NumTests());
+			TestFixture::Printf(": Passed %d out of %d tests\n", test->NumTests(), test->NumTests());
 		return true;
 	}
 
 	if (output != TestFixture::Silent)
 	{
 		if (output != TestFixture::Verbose)
-			printf("[%s/%s]", test->TestGroup(), test->TestName());
+			TestFixture::Printf("[%s/%s]", test->TestGroup(), test->TestName());
 
-		printf(": Failed %d out of %d tests\n", test->NumErrors(), test->NumTests());
+		TestFixture::Printf(": Failed %d out of %d tests\n", test->NumErrors(), test->NumTests());
 
 		for (TestError const* err = test->GetFirstError(), *e = test->GetLastError(); err != e; err = err->next)
 		{
-			printf("%s\n", err->message);
+			TestFixture::Printf("%s\n", err->message);
 		}
 	}
 
 	return false;
 }
+void TestFixture::Printf(char const* string, ...)
+{
+	char tempSpace[4096];
+	va_list args;
+
+	va_start(args, string);
+
+	vsnprintf(tempSpace, sizeof(tempSpace), string, args);
+
+	va_end(args);
+
+	TestFixture::Print(tempSpace);
+}
 bool TestFixture::ExecuteAllTests(OutputMode output)
 {
+	int count = 0;
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
+		++count;
 		if (!locExecuteTest(i, output))
 			passed = false;
 	}
+
+	if (passed)
+		Printf("%d Tests finished. All tests are passing.\n", count);
+	else
+		Printf("%d Tests finished. Some tests are reporting errors.\n", count);
 	return passed;
 }
 bool TestFixture::ExecuteTestGroup(const char* group, OutputMode output)
 {
+	int count = 0;
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
 		if (strcmp(group, i->TestGroup()) == 0)
 		{
+			++count;
 			if (!locExecuteTest(i, output))
 				passed = false;
 		}
+	}
+	if (output != Silent)
+	{
+		if (passed)
+			Printf("%d Tests finished for groups [%s]. All tests are passing.\n", count, group);
+		else
+			Printf("%d Tests finished for groups [%s]. Some tests are reporting errors.\n", count, group);
 	}
 	return passed;
 }
 bool TestFixture::ExecuteSingleTest(const char* group, const char* test, OutputMode output)
 {
+	int count = 0;
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
 		if (strcmp(group, i->TestGroup()) == 0 && strcmp(test, i->TestName()) == 0)
 		{
-			if (!locExecuteTest(i, output))
-				passed = false;
+			++count;
+			passed = locExecuteTest(i, output);
+			break;
 		}
+	}
+
+	if (output != Silent)
+	{
+		if (count == 0)
+			Printf("Fialed to find test [%s/%s].", group, test);
+		else if (passed)
+			Printf("Tests finished for [%s/%s]. All tests are passing.\n", group, test);
+		else
+			Printf("Tests finished for [%s/%s]. Some tests are reporting errors.\n", group, test);
 	}
 	return passed;
 }

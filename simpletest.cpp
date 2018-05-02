@@ -7,7 +7,7 @@
 //---------------------------------------------------------------------------------
 // statics
 //---------------------------------------------------------------------------------
-void DefaultPrint(char const* string) { printf(string); }
+void DefaultPrint(char const* string) { printf("%s", string); }
 
 TestFixture* TestFixture::ourFirstTest;
 thread_local TestFixture* TestFixture::ourCurrentTest;

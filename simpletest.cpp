@@ -219,67 +219,45 @@ void TestFixture::Printf(char const* string, ...)
 
 	TestFixture::Print(tempSpace);
 }
-bool TestFixture::ExecuteAllTests(OutputMode output)
+bool TestFixture::ExecuteAllTests(char const* groupFilter, char const* nameFilter, OutputMode output)
 {
-	int count = 0;
-	bool passed = true;
-	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
-	{
-		++count;
-		if (!locExecuteTest(i, output))
-			passed = false;
-	}
-
-	if (passed)
-		Printf("%d Tests finished. All tests are passing.\n", count);
-	else
-		Printf("%d Tests finished. Some tests are reporting errors.\n", count);
-	return passed;
-}
-bool TestFixture::ExecuteTestGroup(const char* group, OutputMode output)
-{
-	int count = 0;
-	bool passed = true;
-	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
-	{
-		if (strcmp(group, i->TestGroup()) == 0)
-		{
-			++count;
-			if (!locExecuteTest(i, output))
-				passed = false;
-		}
-	}
 	if (output != Silent)
 	{
-		if (passed)
-			Printf("%d Tests finished for groups [%s]. All tests are passing.\n", count, group);
+		if (groupFilter == nullptr && nameFilter == nullptr)
+			Printf("Running all tests.\n");
+		else if (groupFilter != nullptr && nameFilter == nullptr)
+			Printf("Running all tests in groups [%s].\n", groupFilter);
+		else if (groupFilter == nullptr && nameFilter != nullptr)
+			Printf("Running all tests named [%s].\n", nameFilter);
 		else
-			Printf("%d Tests finished for groups [%s]. Some tests are reporting errors.\n", count, group);
+			Printf("Running all tests named [%s/%s].\n", groupFilter, nameFilter);
 	}
-	return passed;
-}
-bool TestFixture::ExecuteSingleTest(const char* group, const char* test, OutputMode output)
-{
+
 	int count = 0;
+	int passes = 0;
+	int fails = 0;
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
-		if (strcmp(group, i->TestGroup()) == 0 && strcmp(test, i->TestName()) == 0)
+		bool matchGroup = groupFilter == nullptr || strcmp(groupFilter, i->TestGroup());
+		bool matchName = groupFilter == nullptr || strcmp(groupFilter, i->TestName());
+		if (matchGroup && matchName)
 		{
 			++count;
-			passed = locExecuteTest(i, output);
-			break;
+			passed &= locExecuteTest(i, output);
+			passes += i->NumTests();
+			fails += i->NumErrors();
 		}
 	}
 
 	if (output != Silent)
 	{
 		if (count == 0)
-			Printf("Fialed to find test [%s/%s].", group, test);
+			Printf("Failed to find any tests.\n");
 		else if (passed)
-			Printf("Tests finished for [%s/%s]. All tests are passing.\n", group, test);
+			Printf("%d Tests finished. All %d assertions are passing.\n", count, passes);
 		else
-			Printf("Tests finished for [%s/%s]. Some tests are reporting errors.\n", group, test);
+			Printf("%d Tests finished, %d of %d assertions failed. Some tests are reporting errors.\n", count, fails, passes);
 	}
 	return passed;
 }

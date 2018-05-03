@@ -98,9 +98,11 @@ public:
 	// Default execution implementation
 	static void (*Print)(char const* string);
 	static void Printf(char const* string, ...);
-	static bool ExecuteAllTests(OutputMode output = Normal);
-	static bool ExecuteTestGroup(const char* group, OutputMode output = Normal);
-	static bool ExecuteSingleTest(const char* group, const char* test, OutputMode output = Normal);
+
+	static bool ExecuteAllTests(char const* groupFilter = nullptr, char const* nameFilter = nullptr, OutputMode output = Normal);
+	static bool ExecuteAllTests(OutputMode output) { return ExecuteAllTests(nullptr, nullptr, output); }
+
+	static bool ExecuteTestGroup(char const* groupFilter, OutputMode output = Normal) { return ExecuteAllTests(groupFilter, nullptr, output); }
 
 protected:
 	virtual void RunTest() = 0;

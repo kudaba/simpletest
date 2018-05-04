@@ -158,8 +158,8 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 // Error reporting don't call directly
 //---------------------------------------------------------------------------------
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
-#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, __VA_ARGS__); } while(0)
-#define TEST_CHECK_(cond, condtext, message, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, __VA_ARGS__)
+#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); } while(0)
+#define TEST_CHECK_(cond, condtext, message, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__)
 
 //---------------------------------------------------------------------------------
 // Tests
@@ -176,4 +176,4 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
 #define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(TestDifference(a,b)))
-#define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, __VA_ARGS__)
+#define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, ##__VA_ARGS__)

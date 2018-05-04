@@ -239,8 +239,8 @@ bool TestFixture::ExecuteAllTests(char const* groupFilter, char const* nameFilte
 	bool passed = true;
 	for (auto i = TestFixture::GetFirstTest(); i; i = i->GetNextTest())
 	{
-		bool matchGroup = groupFilter == nullptr || strcmp(groupFilter, i->TestGroup());
-		bool matchName = groupFilter == nullptr || strcmp(groupFilter, i->TestName());
+		bool matchGroup = groupFilter == nullptr || strcmp(groupFilter, i->TestGroup()) == 0;
+		bool matchName = nameFilter == nullptr || strcmp(nameFilter, i->TestName()) == 0;
 		if (matchGroup && matchName)
 		{
 			++count;

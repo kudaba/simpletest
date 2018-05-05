@@ -101,6 +101,8 @@ TempString TypeToString(char const* value)
 }
 TempString TypeToString(void const* value)
 {
+	if (value == nullptr)
+		return TempString("(nullptr)");
 	TempString tempString;
 	sprintf(tempString.myTextBuffer, "0x%p", value);
 	return tempString;

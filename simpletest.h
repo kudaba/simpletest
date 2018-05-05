@@ -50,10 +50,20 @@ TempString TypeToString(float value);
 TempString TypeToString(double value);
 TempString TypeToString(bool value);
 TempString TypeToString(char const* value);
+TempString TypeToString(void const* value);
+
+inline TempString TypeToString(char* value) { return TypeToString((char const*)value); }
+inline TempString TypeToString(void* value) { return TypeToString((void const*)value); }
 
 // if nothing specified then print some memory
 template<typename T>
 TempString TypeToString(T const&) { return TempString("(unknown type)"); }
+
+template<typename T>
+TempString TypeToString(T const* pointer) { return pointer == nullptr ? TempString("(nullptr)") : TypeToString(*pointer); }
+
+template<typename T>
+TempString TypeToString(T* pointer) { return pointer == nullptr ? TempString("(nullptr)") : TypeToString(*pointer); }
 
 //---------------------------------------------------------------------------------
 // Test fixture is the core of SimpleTest. It provides fixture behavior, access
@@ -159,7 +169,7 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 //---------------------------------------------------------------------------------
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
 #define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); } while(0)
-#define TEST_CHECK_(cond, condtext, message, ...) TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__)
+#define TEST_CHECK_(cond, condtext, message, ...) do { TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__); } while(0)
 
 //---------------------------------------------------------------------------------
 // Tests

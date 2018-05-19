@@ -122,6 +122,7 @@ protected:
 	// Test registration
 	static TestFixture const* LinkTest(TestFixture* test);
 	static TestFixture* ourFirstTest;
+	static TestFixture* ourLastTest;
 
 	TestFixture* myNextTest;
 

@@ -10,6 +10,7 @@
 void DefaultPrint(char const* string) { printf("%s", string); }
 
 TestFixture* TestFixture::ourFirstTest;
+TestFixture* TestFixture::ourLastTest;
 thread_local TestFixture* TestFixture::ourCurrentTest;
 void (*TestFixture::Print)(char const* string) = DefaultPrint;
 
@@ -112,10 +113,19 @@ TempString TypeToString(void const* value)
 // Fixture implementation
 //---------------------------------------------------------------------------------
 TestFixture::TestFixture()
+	: myNextTest(nullptr)
 {
-	// global link list registration
-	myNextTest = ourFirstTest;
-	ourFirstTest = this;
+	// global link list registration, add in order of discovery
+	if (ourFirstTest == nullptr)
+	{
+		ourFirstTest = this;
+		ourLastTest = this;
+	}
+	else
+	{
+		ourLastTest->myNextTest = this;
+		ourLastTest = this;
+	}
 }
 //---------------------------------------------------------------------------------
 bool TestFixture::ExecuteTest()

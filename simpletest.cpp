@@ -114,6 +114,9 @@ TempString TypeToString(void const* value)
 //---------------------------------------------------------------------------------
 TestFixture::TestFixture()
 	: myNextTest(nullptr)
+	, myNumTestsChecked(0)
+	, myNumErrors(0)
+	, myNextError(nullptr)
 {
 	// global link list registration, add in order of discovery
 	if (ourFirstTest == nullptr)

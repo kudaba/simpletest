@@ -32,7 +32,7 @@ struct TestError
 //---------------------------------------------------------------------------------
 struct TempString
 {
-	TempString() : myTextPointer(myTextBuffer) {}
+	TempString() : myTextPointer(myTextBuffer) { myTextBuffer[0] = 0; }
 	TempString(const TempString& other);
 	TempString(char const* string) : myTextPointer(string) {}
 
@@ -57,13 +57,15 @@ inline TempString TypeToString(void* value) { return TypeToString((void const*)v
 
 // if nothing specified then print some memory
 template<typename T>
-TempString TypeToString(T const&) { return TempString("(unknown type)"); }
+TempString TypeToString(T const&) { return TempString(); }
 
 template<typename T>
 TempString TypeToString(T const* pointer) { return pointer == nullptr ? TempString("(nullptr)") : TypeToString(*pointer); }
 
 template<typename T>
 TempString TypeToString(T* pointer) { return pointer == nullptr ? TempString("(nullptr)") : TypeToString(*pointer); }
+
+inline TempString TypeToStringFallback(TempString string, char const* fallback) { return (*string)[0] ?  string : TempString(fallback); }
 
 //---------------------------------------------------------------------------------
 // Test fixture is the core of SimpleTest. It provides fixture behavior, access
@@ -168,6 +170,7 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 //---------------------------------------------------------------------------------
 // Error reporting don't call directly
 //---------------------------------------------------------------------------------
+#define TEST_TYPE_TO_STRING(value) *TypeToStringFallback(TypeToString(value), STR(value))
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
 #define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); } while(0)
 #define TEST_CHECK_(cond, condtext, message, ...) do { TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__); } while(0)
@@ -175,9 +178,10 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 //---------------------------------------------------------------------------------
 // Tests
 //---------------------------------------------------------------------------------
-#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_((a) op1 (b), STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", *TypeToString(a), *TypeToString(b))
+#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_((a) op1 (b), STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", TEST_TYPE_TO_STRING(a), TEST_TYPE_TO_STRING(b))
 
 #define TEST(cond) TEST_EQ(cond, true)
+#define TEST_FAIL(cond) TEST_EQ(cond, false)
 
 #define TEST_EQ(a, b) TEST_OPERATOR(a, b, ==, !=)
 #define TEST_NEQ(a, b) TEST_OPERATOR(a, b, !=, ==)
@@ -186,5 +190,5 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 #define TEST_LESS(a, b) TEST_OPERATOR(a, b, <, >=)
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
-#define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), *TypeToString(TestDifference(a,b)))
+#define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
 #define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, ##__VA_ARGS__)

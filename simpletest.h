@@ -158,7 +158,7 @@ void TOK(group, name)::RunTest()
 // Utils
 //---------------------------------------------------------------------------------
 template <typename T>
-T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp : tmp; }
+T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 
 // why are these still needed?
 #define STR2(x) #x
@@ -190,5 +190,6 @@ T TestDifference(T const& a, T const& b) { T tmp = a - b; return tmp < 0 ? -tmp 
 #define TEST_LESS(a, b) TEST_OPERATOR(a, b, <, >=)
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
-#define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
+#define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than expected amount of " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
+#define TEST_DIFFERS(a, b, eps) TEST_CHECK_(TestDifference(a,b) >= eps, STR(a) " Differs from " STR(b), "Difference of %s is less than expected amount of " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
 #define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, ##__VA_ARGS__)

@@ -178,7 +178,7 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 //---------------------------------------------------------------------------------
 // Tests
 //---------------------------------------------------------------------------------
-#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_((a) op1 (b), STR(a) " " STR(op1) " " STR(b), "%s " STR(op2) " %s", TEST_TYPE_TO_STRING(a), TEST_TYPE_TO_STRING(b))
+#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_((a) op1 (b), STR(a) " " STR(op1) " " STR(b), "'%s' " STR(op2) " '%s'", TEST_TYPE_TO_STRING(a), TEST_TYPE_TO_STRING(b))
 
 #define TEST(cond) TEST_EQ(cond, true)
 #define TEST_FAIL(cond) TEST_EQ(cond, false)

@@ -13,10 +13,6 @@
 #define BASE_FIXTURE TestFixture // use TestFixture as the test base class by default
 #endif
 
-typedef long long int64;
-typedef unsigned int uint;
-typedef unsigned long long uint64;
-
 //---------------------------------------------------------------------------------
 // Link list of errors build into MESSAGE_SPACE
 //---------------------------------------------------------------------------------
@@ -43,9 +39,11 @@ struct TempString
 };
 
 TempString TypeToString(int value);
-TempString TypeToString(int64 value);
-TempString TypeToString(uint value);
-TempString TypeToString(uint64 value);
+TempString TypeToString(unsigned int value);
+TempString TypeToString(long value);
+TempString TypeToString(unsigned long value);
+TempString TypeToString(long long value);
+TempString TypeToString(unsigned long long value);
 TempString TypeToString(float value);
 TempString TypeToString(double value);
 TempString TypeToString(bool value);

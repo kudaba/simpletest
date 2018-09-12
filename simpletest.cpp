@@ -62,19 +62,31 @@ TempString TypeToString(int value)
 	sprintf(tempString.myTextBuffer, "%d", value);
 	return tempString;
 }
-TempString TypeToString(int64 value)
-{
-	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%lld", value);
-	return tempString;
-}
-TempString TypeToString(uint value)
+TempString TypeToString(unsigned int value)
 {
 	TempString tempString;
 	sprintf(tempString.myTextBuffer, "%u", value);
 	return tempString;
 }
-TempString TypeToString(uint64 value)
+TempString TypeToString(long value)
+{
+	TempString tempString;
+	sprintf(tempString.myTextBuffer, "%ld", value);
+	return tempString;
+}
+TempString TypeToString(unsigned long value)
+{
+	TempString tempString;
+	sprintf(tempString.myTextBuffer, "%lu", value);
+	return tempString;
+}
+TempString TypeToString(long long value)
+{
+	TempString tempString;
+	sprintf(tempString.myTextBuffer, "%lld", value);
+	return tempString;
+}
+TempString TypeToString(unsigned long long value)
 {
 	TempString tempString;
 	sprintf(tempString.myTextBuffer, "%llu", value);

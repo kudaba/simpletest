@@ -12,6 +12,9 @@
 #if !defined(BASE_FIXTURE)
 #define BASE_FIXTURE TestFixture // use TestFixture as the test base class by default
 #endif
+#if !defined(ERROR_ACTION)
+#define ERROR_ACTION // Defined any code to run on error. You can use this to debug break or do anything really
+#endif
 
 //---------------------------------------------------------------------------------
 // Link list of errors build into MESSAGE_SPACE
@@ -170,7 +173,7 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 //---------------------------------------------------------------------------------
 #define TEST_TYPE_TO_STRING(value) *TypeToStringFallback(TypeToString(value), STR(value))
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
-#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); } while(0)
+#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); ERROR_ACTION } while(0)
 #define TEST_CHECK_(cond, condtext, message, ...) do { TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__); } while(0)
 
 //---------------------------------------------------------------------------------

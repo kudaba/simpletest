@@ -9,6 +9,9 @@
 #if !defined(STRING_LENGTH)
 #define STRING_LENGTH 64 // size of temp strings for converting types
 #endif
+#if !defined(STRING_EQ_PRINT_LENGTH)
+#define STRING_EQ_PRINT_LENGTH 80 // max line length to show when comparing two strings
+#endif
 #if !defined(BASE_FIXTURE)
 #define BASE_FIXTURE TestFixture // use TestFixture as the test base class by default
 #endif
@@ -87,6 +90,9 @@ public:
 	// Reporting used during testing process
 	void AddTest() { ++myNumTestsChecked; }
 	void LogError(char const* string, ...);
+
+	// Custom test for strings to print out where the comparison failed
+	bool TestStrings(char const* left, char const* right, char const* prefix, char const* condition);
 
 	// Stats from execution
 	int NumTests() const { return myNumTestsChecked; }
@@ -173,7 +179,7 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 //---------------------------------------------------------------------------------
 #define TEST_TYPE_TO_STRING(value) *TypeToStringFallback(TypeToString(value), STR(value))
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
-#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); ERROR_ACTION } while(0)
+#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); ERROR_ACTION; } while(0)
 #define TEST_CHECK_(cond, condtext, message, ...) do { TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__); } while(0)
 
 //---------------------------------------------------------------------------------
@@ -191,6 +197,7 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 #define TEST_LESS(a, b) TEST_OPERATOR(a, b, <, >=)
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
+#define TEST_STR_EQ(a, b) do { if(!TestFixture::GetCurrentTest()->TestStrings(a, b, TEST_ERROR_PREFIX_ "\n%s\n%s\n%s", STR(a) " == " STR(b))) { ERROR_ACTION; } } while(0)
 #define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than expected amount of " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
 #define TEST_DIFFERS(a, b, eps) TEST_CHECK_(TestDifference(a,b) >= eps, STR(a) " Differs from " STR(b), "Difference of %s is less than expected amount of " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
 #define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, ##__VA_ARGS__)

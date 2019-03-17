@@ -15,33 +15,6 @@ thread_local TestFixture* TestFixture::ourCurrentTest;
 void (*TestFixture::Print)(char const* string) = DefaultPrint;
 
 //---------------------------------------------------------------------------------
-// helper to get the number of decimal places to print for floats and doubles
-//---------------------------------------------------------------------------------
-template <typename T>
-static int locDecimals(T value)
-{
-	const T eps = 0.00001f;
-	T remainder = value - (int)value;
-	if (remainder == 0)
-		return 0;
-
-	int decimals = 0;
-
-	// add decimals until hitting the first non-zero number that shouldn't be rounded (close to 0 or 1)
-	bool hitsomething = int(remainder * 10) != 0;
-	while (!hitsomething ||
-		((remainder > eps && remainder < (1 - eps)) ||
-		(remainder < -eps && remainder >(-1 + eps))))
-	{
-		remainder = remainder * 10;
-		remainder = remainder - (int)remainder;
-		hitsomething |= int(remainder * 10) != 0;
-		++decimals;
-	}
-	return decimals;
-}
-
-//---------------------------------------------------------------------------------
 // Standard type printers
 //---------------------------------------------------------------------------------
 TempString::TempString(const TempString& other)
@@ -95,13 +68,13 @@ TempString TypeToString(unsigned long long value)
 TempString TypeToString(float value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%0.*f", locDecimals(value), value);
+	sprintf(tempString.myTextBuffer, "%.16g", value);
 	return tempString;
 }
 TempString TypeToString(double value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%0.*f", locDecimals(value), value);
+	sprintf(tempString.myTextBuffer, "%.16g", value);
 	return tempString;
 }
 TempString TypeToString(bool value)
@@ -156,6 +129,100 @@ bool TestFixture::ExecuteTest()
 	ourCurrentTest = lastCurrent;
 
 	return myNumErrors == 0;
+}
+//---------------------------------------------------------------------------------
+// Utility to print a part of a string to show where the error is and put elipse
+// where the string is truncated
+//---------------------------------------------------------------------------------
+static void locCopyStringWithElipse(char dest[STRING_EQ_PRINT_LENGTH], char const* string, size_t offset = 0)
+{
+	char const* start = string + offset - STRING_EQ_PRINT_LENGTH / 2;
+	if (start < string)
+		start = string;
+
+	int i = 0;
+	for (; i < STRING_EQ_PRINT_LENGTH - 1 && start[i]; ++i)
+	{
+		if (i < 3 && start > string)
+			dest[i] = '.';
+		else if (start[i] == '\r' || start[i] == '\n' || start[i] == '\t')
+			dest[i] = '\\'; // simply replace this with '\', we're just aiming for a general idea not an exact representation
+		else
+			dest[i] = start[i];
+	}
+
+	dest[i] = 0;
+
+	if (i == STRING_EQ_PRINT_LENGTH - 1 && start[i])
+	{
+		dest[i - 1] = '.';
+		dest[i - 2] = '.';
+		dest[i - 3] = '.';
+	}
+}
+//---------------------------------------------------------------------------------
+// Instead of just check for error and printing the string, try go be smart about
+// how the information is written out:
+// ... quick brown fox jumps over ...
+//                      ^
+// ... quick brown fox jamps over ...
+//---------------------------------------------------------------------------------
+bool TestFixture::TestStrings(char const* left, char const* right, char const* prefix, char const* condition)
+{
+	AddTest();
+	if (left == right)
+	{
+		return true;
+	}
+
+	char leftLine[STRING_EQ_PRINT_LENGTH];
+	char rightLine[STRING_EQ_PRINT_LENGTH];
+	char locationLine[STRING_EQ_PRINT_LENGTH];
+
+	if (left == nullptr || right == nullptr)
+	{
+		locationLine[0] = '^';
+		locationLine[1] = 0;
+		if (left == nullptr)
+		{
+			strcpy(leftLine, "nullptr");
+			locCopyStringWithElipse(rightLine, right);
+		}
+		else
+		{
+			locCopyStringWithElipse(leftLine, left);
+			strcpy(rightLine, "nullptr");
+		}
+	}
+	else
+	{
+		char const* testLeft = left;
+		char const* testRight = right;
+
+		int offset = 0;
+		for (; *testLeft && *testRight; ++offset, ++testLeft, ++testRight)
+		{
+			if (*testLeft != *testRight)
+				break;
+		}
+
+		// reached the end of both strings, so they're the same
+		if (!*testLeft && !*testRight)
+			return true;
+
+		locCopyStringWithElipse(leftLine, left, offset);
+		locCopyStringWithElipse(rightLine, right, offset);
+
+		if (offset > STRING_EQ_PRINT_LENGTH / 2)
+			offset = STRING_EQ_PRINT_LENGTH / 2;
+
+		memset(locationLine, ' ', offset);
+		locationLine[offset] = '^';
+		locationLine[offset + 1] = 0;
+	}
+
+	LogError(prefix, condition, leftLine, locationLine, rightLine);
+	return false;
 }
 //---------------------------------------------------------------------------------
 // Write error into current error object and advance pointer if there's still enough space

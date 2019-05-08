@@ -55,6 +55,7 @@ TempString TypeToString(double value);
 TempString TypeToString(bool value);
 TempString TypeToString(char const* value);
 TempString TypeToString(void const* value);
+TempString TypeToString(void const* value, char const* extra);
 
 inline TempString TypeToString(char* value) { return TypeToString((char const*)value); }
 inline TempString TypeToString(void* value) { return TypeToString((void const*)value); }
@@ -64,10 +65,15 @@ template<typename T>
 TempString TypeToString(T const&) { return TempString(); }
 
 template<typename T>
-TempString TypeToString(T const* pointer) { return pointer == nullptr ? TempString("(nullptr)") : TypeToString(*pointer); }
+TempString TypeToString(T const* pointer)
+{
+	return pointer == nullptr ?
+		TypeToString((void const*)pointer) :
+		TypeToString((void const*)pointer, *TypeToString(*pointer));
+}
 
 template<typename T>
-TempString TypeToString(T* pointer) { return pointer == nullptr ? TempString("(nullptr)") : TypeToString(*pointer); }
+TempString TypeToString(T* pointer) { return TypeToString((T const*)pointer); }
 
 inline TempString TypeToStringFallback(TempString string, char const* fallback) { return (*string)[0] ?  string : TempString(fallback); }
 

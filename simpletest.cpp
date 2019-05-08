@@ -32,49 +32,49 @@ TempString::TempString(const TempString& other)
 TempString TypeToString(int value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%d", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%d", value);
 	return tempString;
 }
 TempString TypeToString(unsigned int value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%u", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%u", value);
 	return tempString;
 }
 TempString TypeToString(long value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%ld", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%ld", value);
 	return tempString;
 }
 TempString TypeToString(unsigned long value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%lu", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%lu", value);
 	return tempString;
 }
 TempString TypeToString(long long value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%lld", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%lld", value);
 	return tempString;
 }
 TempString TypeToString(unsigned long long value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%llu", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%llu", value);
 	return tempString;
 }
 TempString TypeToString(float value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%.16g", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%.16g", value);
 	return tempString;
 }
 TempString TypeToString(double value)
 {
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "%.16g", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%.16g", value);
 	return tempString;
 }
 TempString TypeToString(bool value)
@@ -90,7 +90,15 @@ TempString TypeToString(void const* value)
 	if (value == nullptr)
 		return TempString("(nullptr)");
 	TempString tempString;
-	sprintf(tempString.myTextBuffer, "0x%p", value);
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%p", value);
+	return tempString;
+}
+TempString TypeToString(void const* value, char const* extra)
+{
+	if (value == nullptr)
+		return TempString("(nullptr)");
+	TempString tempString;
+	snprintf(tempString.myTextBuffer, STRING_LENGTH, "(0x%p) %s", value, extra);
 	return tempString;
 }
 

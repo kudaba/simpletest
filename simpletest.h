@@ -181,17 +181,27 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 #define TOK(a, b) TOK2(a, b)
 
 //---------------------------------------------------------------------------------
-// Error reporting don't call directly
+// Error reporting and setup, don't call directly
 //---------------------------------------------------------------------------------
-#define TEST_TYPE_TO_STRING(value) *TypeToStringFallback(TypeToString(value), STR(value))
+#define TEST_TYPE_TO_STRING(var, arg) *TypeToStringFallback(TypeToString(var), STR(arg))
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
 #define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); ERROR_ACTION; } while(0)
+#define TEST_BEGIN_(a) do { auto const& test_value_ = a
 #define TEST_CHECK_(cond, condtext, message, ...) do { TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__); } while(0)
+#define TEST_END_ } while(0)
 
 //---------------------------------------------------------------------------------
 // Tests
+//
+// Note: Value caching is only enabled on left hand side. This splits the difference
+// between preventing side effects (i.e. x++ double incrementing) and allowing the
+// compiler to infer values (i.e. TEST_EQ(unsigned(1), 1) will try to cache 1 as an int then omit a compile warning).
+// This means that the right hand side will get evaluated multiple times, so please avoid
+// expressions like: TEST_EQ(a++, b++) as they won't work. Tests should always be written
+// as following:
+// TEST_EQ(expression, constant)
 //---------------------------------------------------------------------------------
-#define TEST_OPERATOR(a, b, op1, op2) TEST_CHECK_((a) op1 (b), STR(a) " " STR(op1) " " STR(b), "'%s' " STR(op2) " '%s'", TEST_TYPE_TO_STRING(a), TEST_TYPE_TO_STRING(b))
+#define TEST_OPERATOR(a, b, op1, op2) TEST_BEGIN_(a); TEST_CHECK_((test_value_) op1 (b), STR(a) " " STR(op1) " " STR(b), "'%s' " STR(op2) " '%s'", TEST_TYPE_TO_STRING(test_value_, a), TEST_TYPE_TO_STRING(b, b)); TEST_END_
 
 #define TEST(cond) TEST_EQ(cond, true)
 #define TEST_FAIL(cond) TEST_EQ(cond, false)
@@ -204,6 +214,6 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
 #define TEST_STR_EQ(a, b) do { if(!TestFixture::GetCurrentTest()->TestStrings(a, b, TEST_ERROR_PREFIX_ "\n%s\n%s\n%s", STR(a) " == " STR(b))) { ERROR_ACTION; } } while(0)
-#define TEST_CLOSE(a, b, eps) TEST_CHECK_(TestDifference(a,b) <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than expected amount of " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
-#define TEST_DIFFERS(a, b, eps) TEST_CHECK_(TestDifference(a,b) >= eps, STR(a) " Differs from " STR(b), "Difference of %s is less than expected amount of " STR(eps), TEST_TYPE_TO_STRING(TestDifference(a,b)))
-#define TEST_MESSAGE(cond, message, ...) TEST_CHECK_(cond, STR(cond), message, ##__VA_ARGS__)
+#define TEST_CLOSE(a, b, eps) TEST_BEGIN_(TestDifference(a, b)); TEST_CHECK_(test_value_ <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than expected amount of " STR(eps), TEST_TYPE_TO_STRING(test_value_, TestDifference(a, b))); TEST_END_
+#define TEST_DIFFERS(a, b, eps) TEST_BEGIN_(TestDifference(a, b)); TEST_CHECK_(test_value_ >= eps, STR(a) " Differs from " STR(b), "Difference of %s is less than expected amount of " STR(eps), TEST_TYPE_TO_STRING(test_value_, TestDifference(a, b))); TEST_END_
+#define TEST_MESSAGE(cond, message, ...) TEST_BEGIN_(cond); TEST_CHECK_(test_value_, STR(cond), message, ##__VA_ARGS__); TEST_END_

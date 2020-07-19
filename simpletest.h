@@ -57,6 +57,10 @@ TempString TypeToString(char const* value);
 TempString TypeToString(void const* value);
 TempString TypeToString(void const* value, char const* extra);
 
+inline TempString TypeToString(char value) { return TypeToString((int)value); }
+inline TempString TypeToString(unsigned char value) { return TypeToString((unsigned int)value); }
+inline TempString TypeToString(short value) { return TypeToString((int)value); }
+inline TempString TypeToString(unsigned short value) { return TypeToString((unsigned int)value); }
 inline TempString TypeToString(char* value) { return TypeToString((char const*)value); }
 inline TempString TypeToString(void* value) { return TypeToString((void const*)value); }
 

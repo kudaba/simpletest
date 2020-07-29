@@ -99,7 +99,8 @@ public:
 
 	// Reporting used during testing process
 	void AddTest() { ++myNumTestsChecked; }
-	void LogError(char const* string, ...);
+	void AddError() { ++myNumErrors; }
+	void LogMessage(char const* string, ...);
 
 	// Custom test for strings to print out where the comparison failed
 	bool TestStrings(char const* left, char const* right, char const* prefix, char const* condition);
@@ -189,7 +190,7 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 //---------------------------------------------------------------------------------
 #define TEST_TYPE_TO_STRING(var, arg) *TypeToStringFallback(TypeToString(var), STR(arg))
 #define TEST_ERROR_PREFIX_ __FILE__ "(" STR(__LINE__) "): Condition [%s] Failed. "
-#define TEST_ERROR_(message, ...) do { TestFixture::GetCurrentTest()->LogError(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); ERROR_ACTION; } while(0)
+#define TEST_ERROR_(message, ...) do { TestFixture* __fx = TestFixture::GetCurrentTest(); __fx->AddError(); __fx->LogMessage(TEST_ERROR_PREFIX_ message, ##__VA_ARGS__); ERROR_ACTION; } while(0)
 #define TEST_BEGIN_(a) do { auto const& test_value_ = a
 #define TEST_CHECK_(cond, condtext, message, ...) do { TestFixture::GetCurrentTest()->AddTest(); if (!(cond)) TEST_ERROR_(message, condtext, ##__VA_ARGS__); } while(0)
 #define TEST_END_ } while(0)

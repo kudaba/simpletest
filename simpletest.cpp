@@ -229,16 +229,15 @@ bool TestFixture::TestStrings(char const* left, char const* right, char const* p
 		locationLine[offset + 1] = 0;
 	}
 
-	LogError(prefix, condition, leftLine, locationLine, rightLine);
+	AddError();
+	LogMessage(prefix, condition, leftLine, locationLine, rightLine);
 	return false;
 }
 //---------------------------------------------------------------------------------
 // Write error into current error object and advance pointer if there's still enough space
 //---------------------------------------------------------------------------------
-void TestFixture::LogError(char const* string, ...)
+void TestFixture::LogMessage(char const* string, ...)
 {
-	++myNumErrors;
-
 	uintptr_t spaceLeft = (myMessageSpace + MESSAGE_SPACE) - (char*)myNextError;
 
 	if (spaceLeft == 0)

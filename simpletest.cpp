@@ -3,6 +3,7 @@
 #include <string.h>
 #include <cstdint>
 #include <stdarg.h>
+#include <time.h>
 
 //---------------------------------------------------------------------------------
 // statics
@@ -282,13 +283,20 @@ TestFixture const* TestFixture::LinkTest(TestFixture* test)
 //---------------------------------------------------------------------------------
 static bool locExecuteTest(TestFixture* test, TestFixture::OutputMode output)
 {
+	clock_t start = 0;
 	if (output == TestFixture::Verbose)
+	{
 		TestFixture::Printf("Running [%s/%s]", test->TestGroup(), test->TestName());
+		start = clock();
+	}
 
 	if (test->ExecuteTest())
 	{
 		if (output == TestFixture::Verbose)
-			TestFixture::Printf(": Passed %d out of %d tests\n", test->NumTests(), test->NumTests());
+		{
+			clock_t end = clock();
+			TestFixture::Printf(": Passed %d out of %d tests in %g seconds\n", test->NumTests(), test->NumTests(), float(end - start) / (float)CLOCKS_PER_SEC);
+		}
 		return true;
 	}
 

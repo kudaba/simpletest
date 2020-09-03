@@ -219,6 +219,6 @@ T TestDifference(T const& a, T const& b) { return a > b ? a - b : b - a; }
 #define TEST_LESS_EQUAL(a, b) TEST_OPERATOR(a, b, <=, >)
 
 #define TEST_STR_EQ(a, b) do { if(!TestFixture::GetCurrentTest()->TestStrings(a, b, TEST_ERROR_PREFIX_ "\n%s\n%s\n%s", STR(a) " == " STR(b))) { ERROR_ACTION; } } while(0)
-#define TEST_CLOSE(a, b, eps) TEST_BEGIN_(TestDifference(a, b)); TEST_CHECK_(test_value_ <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than expected amount of " STR(eps), TEST_TYPE_TO_STRING(test_value_, TestDifference(a, b))); TEST_END_
-#define TEST_DIFFERS(a, b, eps) TEST_BEGIN_(TestDifference(a, b)); TEST_CHECK_(test_value_ >= eps, STR(a) " Differs from " STR(b), "Difference of %s is less than expected amount of " STR(eps), TEST_TYPE_TO_STRING(test_value_, TestDifference(a, b))); TEST_END_
+#define TEST_CLOSE(a, b, eps) TEST_BEGIN_(TestDifference(a, b)); TEST_CHECK_(test_value_ <= eps, STR(a) " Close to " STR(b), "Difference of %s is greater than expected amount of " STR(eps) " when comparing %s and %s", TEST_TYPE_TO_STRING(test_value_, TestDifference(a, b)), TEST_TYPE_TO_STRING(a, a), TEST_TYPE_TO_STRING(b, b)); TEST_END_
+#define TEST_DIFFERS(a, b, eps) TEST_BEGIN_(TestDifference(a, b)); TEST_CHECK_(test_value_ >= eps, STR(a) " Differs from " STR(b), "Difference of %s is less than expected amount of " STR(eps) " when comparing %s and %s", TEST_TYPE_TO_STRING(test_value_, TestDifference(a, b)), TEST_TYPE_TO_STRING(a, a), TEST_TYPE_TO_STRING(b, b)); TEST_END_
 #define TEST_MESSAGE(cond, message, ...) TEST_BEGIN_(cond); TEST_CHECK_(test_value_, STR(cond), message, ##__VA_ARGS__); TEST_END_

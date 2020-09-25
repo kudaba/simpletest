@@ -33,37 +33,55 @@ TempString::TempString(const TempString& other)
 TempString TypeToString(int value)
 {
 	TempString tempString;
-	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%d", value);
+	if (TestFixture::GetCurrentTest()->GetPrintMethod() == TestFixture::PrintHexadecimal)
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%08X", value);
+	else
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "%d", value);
 	return tempString;
 }
 TempString TypeToString(unsigned int value)
 {
 	TempString tempString;
-	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%u", value);
+	if (TestFixture::GetCurrentTest()->GetPrintMethod() == TestFixture::PrintHexadecimal)
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%08X", value);
+	else
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "%u", value);
 	return tempString;
 }
 TempString TypeToString(long value)
 {
 	TempString tempString;
-	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%ld", value);
+	if (TestFixture::GetCurrentTest()->GetPrintMethod() == TestFixture::PrintHexadecimal)
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%016lX", value);
+	else
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "%ld", value);
 	return tempString;
 }
 TempString TypeToString(unsigned long value)
 {
 	TempString tempString;
-	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%lu", value);
+	if (TestFixture::GetCurrentTest()->GetPrintMethod() == TestFixture::PrintHexadecimal)
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%016lX", value);
+	else
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "%lu", value);
 	return tempString;
 }
 TempString TypeToString(long long value)
 {
 	TempString tempString;
-	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%lld", value);
+	if (TestFixture::GetCurrentTest()->GetPrintMethod() == TestFixture::PrintHexadecimal)
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%016llX", value);
+	else
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "%lld", value);
 	return tempString;
 }
 TempString TypeToString(unsigned long long value)
 {
 	TempString tempString;
-	snprintf(tempString.myTextBuffer, STRING_LENGTH, "%llu", value);
+	if (TestFixture::GetCurrentTest()->GetPrintMethod() == TestFixture::PrintHexadecimal)
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "0x%016llX", value);
+	else
+		snprintf(tempString.myTextBuffer, STRING_LENGTH, "%llu", value);
 	return tempString;
 }
 TempString TypeToString(float value)
@@ -108,9 +126,10 @@ TempString TypeToString(void const* value, char const* extra)
 //---------------------------------------------------------------------------------
 TestFixture::TestFixture()
 	: myNextTest(nullptr)
+	, myNextError(nullptr)
 	, myNumTestsChecked(0)
 	, myNumErrors(0)
-	, myNextError(nullptr)
+	, myPrintMethod(PrintDefault)
 {
 	// global link list registration, add in order of discovery
 	if (ourFirstTest == nullptr)

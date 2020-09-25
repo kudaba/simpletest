@@ -125,6 +125,15 @@ public:
 		Verbose
 	};
 
+	enum PrintMethod
+	{
+		PrintDefault,
+		PrintHexadecimal,
+	};
+
+	PrintMethod GetPrintMethod() const { return myPrintMethod; }
+	void SetPrintMethod(PrintMethod aPrintMethod) { myPrintMethod = aPrintMethod; }
+
 	// Default execution implementation
 	static void (*Print)(char const* string);
 	static void Printf(char const* string, ...);
@@ -145,11 +154,13 @@ protected:
 	static TestFixture* ourLastTest;
 
 	TestFixture* myNextTest;
+	TestError* myNextError;
 
 	int myNumTestsChecked;
 	int myNumErrors;
 
-	TestError* myNextError;
+	PrintMethod myPrintMethod;
+
 	char myMessageSpace[MESSAGE_SPACE];
 
 	// allow access to current test outside of main code block

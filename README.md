@@ -1,6 +1,6 @@
 # simpletest-EmbeddedSafety
 
-_**A super simple framwork for implementing Unit Tests ON embedded systems**_
+_**A super simple framwork for implementing Unit Tests ON embedded systems with functional safety requirements**_
 
 [![Build Status](https://travis-ci.org/kudaba/simpletest_test.svg?branch=master)](https://travis-ci.org/kudaba/simpletest_test)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/kudaba/simpletest_test?branch=master&svg=true)](https://ci.appveyor.com/project/kudaba/simpletest-test)
@@ -9,6 +9,8 @@ _**A super simple framwork for implementing Unit Tests ON embedded systems**_
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/15803/badge.svg"/>
 </a>
+
+Tested with ARM compiler 6.6 and 6.6.4 using ARM FuSa (Functional Safety) library. 
 
 A lot of c++ unit tests claim to be simple, but when I went searching for the perfect one there was always something that prevented me from using it. They were either overly complicated or had some critical flaw like excess memory allocations or dependencies on external programs. So here is the simplest form of unit test I could come up with to cover basic development. My rules for simple were the following:
 * Basic test features only: fixtures and test

@@ -1,6 +1,6 @@
-# simpletest
+# simpletest-EmbeddedSafety
 
-_**A super simple framwork for implementing Unit Tests**_
+_**A super simple framwork for implementing Unit Tests ON embedded systems with functional safety requirements**_
 
 [![Build Status](https://travis-ci.org/kudaba/simpletest_test.svg?branch=master)](https://travis-ci.org/kudaba/simpletest_test)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/kudaba/simpletest_test?branch=master&svg=true)](https://ci.appveyor.com/project/kudaba/simpletest-test)
@@ -10,12 +10,14 @@ _**A super simple framwork for implementing Unit Tests**_
        src="https://scan.coverity.com/projects/15803/badge.svg"/>
 </a>
 
+Tested with ARM compiler 6.6 and 6.6.4 using ARM FuSa (Functional Safety) library. 
+
 A lot of c++ unit tests claim to be simple, but when I went searching for the perfect one there was always something that prevented me from using it. They were either overly complicated or had some critical flaw like excess memory allocations or dependencies on external programs. So here is the simplest form of unit test I could come up with to cover basic development. My rules for simple were the following:
 * Basic test features only: fixtures and test
 * Simple, isolated test declaration
 * No memory allocations, at all
 * Very few, if any dependencies
-* Bonus: Threadable
+* Bonus: Threadable (not in the EmbeddedSafety version)
 
 Head over to [simpletest_test](https://github.com/kudaba/simpletest_test) for more complete usage examples.
 
@@ -94,7 +96,7 @@ One of the main reason I want a unit test is to make sure my code doesn't leak. 
 # Very few dependencies
 After seeing unit tests that need perl or python to generate test harnesses, or other crazy code dependencies, I wanted to use the most limited set of dependencies I could. I didn't go as far as a single header implementation, but even the cpp only depends on two standard headers, stdio.h and string.h.
 
-# Threadable
+# Threadable (not applicable to the EmbeddedSafety version)
 By keeping the fixture, test and results in a single object it means that the execution of a single test is threadable as long that the test code itself is contained and threadable. There is no default threaded implementation of test execution, but you can see the simpletest_test project for more advanced examples.
 
 # Notable Differences
@@ -113,7 +115,7 @@ Global configuration is generally done by defininy macros before including simpl
 If you want all tests to use the same fixture, for default memory checking or exception catching, then simply define the macro BASE_FIXTURE.
 
 ## Static memory usage
-To achieve allocation free tests I needed to give each test a memory area to write their error messages. The default is (probably out of date) 10k per test. You can override this by defining the MESSAGE_SPACE macro.
+To achieve allocation free tests I needed to give each test a memory area to write their error messages. The default is (probably out of date) 10k per test (in the EmbeddedSafety version it is much smaller at 100 bytes). You can override this by defining the MESSAGE_SPACE macro.
 
 ## Temporary string length
 The buffer size of the temporary string object can be set by defining STRING_LENGTH. I figured 64 bytes is a decent size for anything that isn't already a string.
